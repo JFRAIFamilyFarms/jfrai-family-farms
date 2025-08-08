@@ -1,0 +1,46 @@
+name: Build JFRAI Family Farms APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        
+    - name: Install dependencies and build
+      run: |
+        cd frontend
+        npm install -g yarn
+        yarn install
+        yarn build
+        npx cap sync android
+        
+    - name: Build APK
+      run: |
+        cd frontend/android
+        chmod +x gradlew
+        ./gradlew clean
+        ./gradlew assembleDebug
+        
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: JFRAI-Family-Farms-APK
+        path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
