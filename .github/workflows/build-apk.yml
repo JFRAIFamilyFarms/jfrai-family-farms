@@ -11,25 +11,90 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       
     - name: Setup Java
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '20'
+        
+    - name: Create basic React app structure
+      run: |
+        mkdir -p frontend/src frontend/public
+        
+    - name: Create React files
+      run: |
+        cd frontend
+        
+        # Create public/index.html
+        cat > public/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>JFRAI Family Farms</title>
+        </head>
+        <body>
+          <div id="root"></div>
+        </body>
+        </html>
+        EOF
+        
+        # Create src/index.js
+        cat > src/index.js << 'EOF'
+        import React from 'react';
+        import ReactDOM from 'react-dom/client';
+        import App from './App';
+        
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+        EOF
+        
+        # Create src/App.js
+        cat > src/App.js << 'EOF'
+        import React from 'react';
+        
+        function App() {
+          return (
+            <div style={{padding: '20px', fontFamily: 'Arial, sans-serif'}}>
+              <h1 style={{color: '#16a34a'}}>🌱 JFRAI Family Farms</h1>
+              <p>Smart Agricultural Assistant</p>
+              <h2>Features:</h2>
+              <ul>
+                <li>14 Crop varieties with growing guides</li>
+                <li>Soil analysis and NPK calculations</li>
+                <li>Weather-integrated recommendations</li>
+                <li>GPS location services</li>
+                <li>Premium subscription plans</li>
+              </ul>
+            </div>
+          );
+        }
+        
+        export default App;
+        EOF
         
     - name: Install dependencies and build
       run: |
         cd frontend
         npm install -g yarn
         yarn install
+        yarn add react react-dom react-scripts
         yarn build
+        
+    - name: Setup Capacitor
+      run: |
+        cd frontend
+        yarn add @capacitor/core @capacitor/cli @capacitor/android
+        npx cap init "JFRAI Family Farms" "com.jfraifamilyfarms.app"
+        npx cap add android
         npx cap sync android
         
     - name: Build APK
@@ -40,7 +105,7 @@ jobs:
         ./gradlew assembleDebug
         
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: JFRAI-Family-Farms-APK
         path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
