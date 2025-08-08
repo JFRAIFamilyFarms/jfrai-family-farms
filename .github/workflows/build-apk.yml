@@ -20,22 +20,22 @@ jobs:
     - name: Create complete app structure
       run: |
         # Create React app from scratch
-        npx create-react-app frontend --template typescript
+        npx create-react-app frontend
         cd frontend
         
         # Install Capacitor
         npm install @capacitor/core @capacitor/cli @capacitor/android
         
-        # Initialize Capacitor
-        npx cap init "JFRAI Family Farms" "com.jfraifamilyfarms.app"
+        # Initialize Capacitor with correct webDir
+        npx cap init "JFRAI Family Farms" "com.jfraifamilyfarms.app" --web-dir=build
+        
+        # Build React app first
+        npm run build
         
         # Add Android platform
         npx cap add android
         
-        # Build React app
-        npm run build
-        
-        # Sync with Capacitor
+        # Now sync with the built files
         npx cap sync android
         
     - name: Build APK
